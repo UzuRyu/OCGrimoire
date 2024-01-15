@@ -15,7 +15,6 @@ const bookSchema = mongoose.Schema({
             },
           ],
     },
-
     averageRating: { type: Number, required: true },
 });
 

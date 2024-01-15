@@ -6,9 +6,10 @@ module.exports = (req, res, next) => {
         const decodedToken = jwt.verify(token, 'POENIX_STUDIO_LOU_PESCHET_MAGIC_LIBRAIRIE');
         const userId = decodedToken.userId;
         req.auth = {
-            userId: userId 
+            userId: userId
         };
+        next();
     } catch (error) {
         res.status(401).json({ error });
     }
-}
+};

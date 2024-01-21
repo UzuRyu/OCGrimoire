@@ -1,12 +1,22 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+require('dotenv').config();
 
 exports.signup = (req, res, next) => {
+
+    /*if (!isStrong(req.body.password)) {
+        return res.status(400).json({ message: 'Le mot de passe doit être fort.' });
+    }*/
+
+    if (!isValidEmail(req.body.email)) {
+        return res.status(400).json({ message: 'Email invalide' });
+    }
+
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
-                email: req.body.email,
+                email: req.body.email.toLowerCase(),
                 password: hash
             });
             user.save()
@@ -31,7 +41,7 @@ exports.login = (req, res, next) => {
                                 userId: user._id,
                                 token: jwt.sign(
                                     { userId: user._id },
-                                    'POENIX_STUDIO_LOU_PESCHET_MAGIC_LIBRAIRIE',
+                                    process.env.SECRET,
                                     { expiresIn: '24h' }
                                 )
                             })
@@ -46,3 +56,18 @@ exports.login = (req, res, next) => {
             res.status(500).json({ error });
         })
 };
+
+function isStrong(password) {
+    const minLength = 8;
+    const nombre = /\d/.test(password);
+    const majuscule = /[A-Z]/.test(password);
+    const minuscule = /[a-z]/.test(password);
+    const special = /[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]/.test(password);
+
+    return (password.length >= minLength && nombre && majuscule && minuscule && special);
+}
+
+function isValidEmail(email) {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return emailRegex.test(email);
+}

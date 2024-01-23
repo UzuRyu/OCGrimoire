@@ -2,12 +2,12 @@ const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 
-const storage = multer.memoryStorage();  // Stocke l'image en mémoire pour la manipuler avec Sharp
+const storage = multer.memoryStorage();  // Stocke temporairement l'image en mémoire pour la manipuler avec Sharp
 
 const upload = multer({
     storage: storage,
     fileFilter: (req, file, callback) => {
-        if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png|webp)$/)) {
             return callback(new Error('Seuls les fichiers image sont autorisés.'));
         }
         callback(null, true);
@@ -18,12 +18,12 @@ const opti = async (req, res, next) => {
     if (req.file) {
         try {
             const optiBuffer = await sharp(req.file.buffer)
-                .webp({ quality: 30 })  // Vous pouvez ajuster la qualité selon vos besoins
+                .webp({ quality: 30 })
                 .toBuffer();
 
             // Stocker le fichier optimisé dans le dossier "./images"
             const bookObject = JSON.parse(req.body.book);
-            const optiFileName = bookObject.title + Date.now() + '.webp';
+            const optiFileName = bookObject.title.trim().replace(/\s+/g, ' ') + Date.now() + '.webp';
             const optiFilePath = 'images/' + optiFileName;
             
             // Écrire le fichier optimisé sur le disque

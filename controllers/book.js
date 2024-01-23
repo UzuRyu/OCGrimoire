@@ -8,11 +8,11 @@ exports.createBook = (req, res, next) => {
     delete bookObject.userId;
     const book = new Book({
         userId: req.auth.userId,
-        title: bookObject.title,
-        author: bookObject.author,
+        title: bookObject.title.trim().replace(/\s+/g, ' '),
+        author: bookObject.author.trim().replace(/\s+/g, ' '),
         imageUrl: `${req.protocol}://${req.get('host')}/${req.file.path}`,
         year: bookObject.year,
-        genre: bookObject.genre,
+        genre: bookObject.genre.trim().replace(/\s+/g, ' '),
         ratings: (bookObject.averageRating > 0) ? bookObject.ratings : [],
         averageRating: bookObject.averageRating,
     });
@@ -77,10 +77,17 @@ exports.destroyBook = (req, res, next) => {
 exports.modifyBook = (req, res, next) => {
     // Vérifier si nouvelle image
     const bookObject = req.file
-      ? {
-          ...JSON.parse(req.body.book),
-          imageUrl: `${req.protocol}://${req.get('host')}/${req.file.path}`,}
-      : { ...req.body }; 
+        ? {
+            ...JSON.parse(req.body.book),
+            imageUrl: `${req.protocol}://${req.get('host')}/${req.file.path}`,
+        }
+        : { ...req.body };
+    // Trim les données pour meilleurs base de données
+    for (const prop in bookObject) {
+        if (typeof bookObject[prop] === 'string') {
+            bookObject[prop] = bookObject[prop].trim().replace(/\s+/g, ' ');
+        }
+    }
     Book.findOne({ _id: req.params.id })
         .then((book) => {
             // Vérifier que l'utilsateur est bel et bien le créateur initial de l'entrée

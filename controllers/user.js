@@ -5,18 +5,20 @@ require('dotenv').config();
 
 exports.signup = (req, res, next) => {
 
+    // Vérifie la force du mot de passe (désactivé pour tests plus simples)
     /*if (!isStrong(req.body.password)) {
         return res.status(400).json({ message: 'Le mot de passe doit être fort.' });
     }*/
-
-    if (!isValidEmail(req.body.email)) {
+    
+    // Vérifie que l'email est valide
+    if (!isValidEmail(req.body.email.trim())) {
         return res.status(400).json({ message: 'Email invalide' });
     }
 
     bcrypt.hash(req.body.password, 10)
         .then(hash => {
             const user = new User({
-                email: req.body.email.toLowerCase(),
+                email: req.body.email.toLowerCase().trim(),
                 password: hash
             });
             user.save()
